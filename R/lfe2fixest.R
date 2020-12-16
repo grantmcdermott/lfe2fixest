@@ -32,7 +32,8 @@
 #'   Other limitations include: (1) `lfe2fixest()` assumes that users provide a
 #'   dataset in their model calls (i.e. regressions with global variables are
 #'   not supported). (2) `lfe2fixest()` does not yet handle multiple IV
-#'   regression.
+#'   regression. (3) Comments inside the `felm()` model call are liable to mess
+#'   things up. I'll try to address these as time allows.
 #' @seealso \code{\link[lfe]{felm}}, \code{\link[fixest]{feols}},
 #'   \code{\link[modelsummary]{modelsummary}}.
 #' @return An R script.
@@ -64,8 +65,8 @@
 #'      (x1 ~ x3) |
 #'      mnth,
 #'      weights = aq$x2,
-#'      cmethod = 'reghdfe', ## irrelevant option for feols
-#'      exactDOF = TRUE,     ## ditto
+#'      cmethod = 'reghdfe',
+#'      exactDOF = TRUE,
 #'      data = aq
 #'      )"
 #' writeLines(lfe_string, 'lfe_script.R')
@@ -79,11 +80,11 @@
 #'
 #' ## First the lfe version
 #' source('lfe_script.R')
-#' msummary(list(mod1, mod2, mod3, mod4))
+#' msummary(list(mod1, mod2, mod3, mod4), gof_omit = 'Psuedo|Log|IC'))
 #'
 #' ## Then the fixest conversion
 #' source('fixest_script.R')
-#' msummary(list(mod1, mod2, mod3, mod4))
+#' msummary(list(mod1, mod2, mod3, mod4), gof_omit = 'Psuedo|Log|IC')
 #'
 #' ## Clean up
 #' file.remove(c('lfe_script.R', 'fixest_script.R'))
