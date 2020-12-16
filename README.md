@@ -17,9 +17,9 @@ Both `lfe::felm()` and `fixest::feols()` provide “fixed-effects”
 estimation routines for high-dimensional data. Both methods are also
 highly optimised. However, `feols()` is newer, tends to be significantly
 faster, and allows for additional functionality (e.g. a `predict`
-method). At the time writing this conversion package, **lfe** has also
-been (temporarily) removed from CRAN after a period of stasis, leading
-to downstream issues.
+method). At the time of writing this conversion package, **lfe** has
+also been (temporarily) removed from CRAN after a period of stasis,
+leading to downstream issues.
 
 The syntax between `lfe::felm()` and `fixest::feols()` is similar, if
 not quite offering a drop-in replacement. This package therefore aims to
