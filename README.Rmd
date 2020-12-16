@@ -23,6 +23,21 @@ from the [**lfe**](https://github.com/sgaure/lfe) package and convert
 them to their `feols()` equivalents from the 
 [**fixest**](https://github.com/lrberge/fixest) package.
 
+Why would you want to do this?
+
+Both `lfe::felm()` and `fixest::feols()` provide "fixed-effects" estimation 
+routines for high-dimensional data. Both methods are also highly optimised. 
+However, `feols()` is newer, tends to be significantly faster and allows for 
+additional functionality (e.g. a `predict` method). At the time writing this 
+conversion package, **lfe** has also been (temporarily) removed from CRAN after
+a period of stasis, leading to downstream problems.
+
+The syntax between `lfe::felm()` and `fixest::feols()` is similar, if not quite 
+offering a drop-in replacement. This package therefore aims to automate the 
+conversion process; ignoring non-relevant arguments and differing options 
+between the two, while doing its best to ensure that the resulting scripts will 
+produce the same output.
+
 ## Installation
 
 Install the package from GitHub:
