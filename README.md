@@ -90,8 +90,8 @@ msummary(mods, gof_omit = 'Pseudo|Within|Log|IC', output = 'markdown')
 writeLines(lfe_string, 'lfe_script.R')
 ```
 
-We can convert it to something that is **fixest**-friendly using the
-package’s main (only!) function, `lfe2fixest::lfe2fixest()`.
+We can now convert this script to the **fixest** equivalent using the
+package’s main function, `lfe2fixest()` (or its alias, `felm2feols()`).
 
 While the function accepts several arguments, the most important (and
 only required) one is an input file. Similarly, if no output file

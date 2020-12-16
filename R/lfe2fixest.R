@@ -43,7 +43,7 @@
 #'   The function does not yet handle multiple IV regression; i.e. multiple
 #'   endogenous variables.
 #'
-#'   I'll try to address these limtations as time allows.
+#'   I'll try to address these limitations as time allows.
 #' @seealso \code{\link[lfe]{felm}}, \code{\link[fixest]{feols}},
 #'   \code{\link[modelsummary]{modelsummary}}.
 #' @return An R script.
@@ -213,3 +213,13 @@ lfe2fixest =
 		if (!is.null(outfile)) writeLines(fixest_script, outfile)
 
 	}
+
+## Let's add a 'felm2feols' alias
+#' @rdname lfe2fixest
+#' @examples
+#' \dontrun{
+#' ## For people that like options, there's the felm2feols() alias...
+#' felm2fixest('another_felm_script.R')
+#' }
+#' @export
+felm2feols = lfe2fixest

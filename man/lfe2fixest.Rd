@@ -2,9 +2,12 @@
 % Please edit documentation in R/lfe2fixest.R
 \name{lfe2fixest}
 \alias{lfe2fixest}
+\alias{felm2feols}
 \title{Converts \code{lfe::felm()} commands into their \code{fixest::feols()} equivalents.}
 \usage{
 lfe2fixest(infile = NULL, outfile = NULL, verbose = FALSE, robust = FALSE)
+
+felm2feols(infile = NULL, outfile = NULL, verbose = FALSE, robust = FALSE)
 }
 \arguments{
 \item{infile}{An R script containing \code{lfe::felm()} commands. Required.}
@@ -60,7 +63,7 @@ constructed programatically (e.g. with \code{Formula()}) are not supported. (4)
 The function does not yet handle multiple IV regression; i.e. multiple
 endogenous variables.
 
-I'll try to address these limtations as time allows.
+I'll try to address these limitations as time allows.
 }
 \examples{
 \dontrun{
@@ -120,6 +123,10 @@ source('fixest_script.R', print.eval = TRUE)
 
 ## Clean up
 file.remove(c('lfe_script.R', 'fixest_script.R'))
+}
+\dontrun{
+## For people that like options, there's the felm2feols() alias...
+felm2fixest('another_felm_script.R')
 }
 }
 \seealso{
