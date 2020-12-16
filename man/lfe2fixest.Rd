@@ -49,7 +49,7 @@ same output.
 Note that the conversion only handles (or attempts to handle) the actual
 model calls. No attempt is made to convert downstream objects or functions
 like regression table construction. Although, you will probably be okay if
-you use a modern table-generating package like \code{modesummary}.
+you use a modern table-generating package like \code{modelsummary}.
 
 Other limitations include: (1) The function more or less implements a
 literal translation of the relevant \code{felm} model. It doesn't support
@@ -59,11 +59,7 @@ if the literal translation doesn't yield all of the additional performance
 boosts and tricks that \code{feols()} offers. (2) The function assumes that
 users always provide a dataset in their model calls; i.e. regressions with
 global variables are not supported. (3) Similarly, models that are
-constructed programatically (e.g. with \code{Formula()}) are not supported. (4)
-The function does not yet handle multiple IV regression; i.e. multiple
-endogenous variables.
-
-I'll try to address these limitations as time allows.
+constructed programatically (e.g. with \code{Formula()}) are not supported.
 }
 \examples{
 \dontrun{
@@ -130,6 +126,5 @@ felm2fixest('another_felm_script.R')
 }
 }
 \seealso{
-\code{\link[lfe]{felm}}, \code{\link[fixest]{feols}},
-\code{\link[modelsummary]{modelsummary}}.
+\code{\link[lfe]{felm}}, \code{\link[fixest]{feols}}.
 }

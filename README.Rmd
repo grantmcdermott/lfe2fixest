@@ -94,8 +94,16 @@ mod4 = felm(y ~ 1 |
             data = aq
             )
 
+## Multiple IV
+mod5 = felm(y ~ 1 |
+              0 |
+              (x1|x2 ~ x3 + dy + mnth) |
+              dy,
+            data = aq
+            )
+
 ## Regression table
-mods = list(mod1, mod2, mod3, mod4)
+mods = list(mod1, mod2, mod3, mod4, mod5)
 msummary(mods, gof_omit = 'Pseudo|Within|Log|IC', output = 'markdown')
 "
 writeLines(lfe_string, 'lfe_script.R')
@@ -151,7 +159,7 @@ file.remove(c('lfe_script.R', 'fixest_script.R'))
 
 ## Caveats
 
-This package was thrown together pretty quickly. Current limitations include:
+Current limitations include:
 
 - `feols()` offers a variety of optimised features and syntax for things like 
 [varying slopes](https://cran.r-project.org/web/packages/fixest/vignettes/fixest_walkthrough.html#31_Varying_slopes), 
@@ -161,12 +169,13 @@ etc. that go beyond the standard R syntax (although the latter still works).
 more or less a literal translation of the `felm()` formula. The goal is to get 
 you up and running with as little pain as possible, rather than eking every 
 extra bit out of `feols()`'s already eye-watering performance.
+- The conversion only handles (or attempts to handle) the actual model calls. No 
+attempt is made to convert downstream objects or functions like regression table 
+construction. Although, as demonstrated in the example, you should be okay if 
+you use a modern table-generating package like **modelsummary**. The same will 
+not be true of **stargazer**, for example.
 - We assume that users always provide a dataset in their model calls (i.e. 
 regressions with global variables are not supported). 
 - Similarly, the package only supports models that are explicitly written out in 
 a script. If your models are constructed programatically (e.g. with `Formula()`) 
 then the conversion probably won't work.
-- Multiple IV regressions (i.e. multiple endogenous variables) are not yet 
-supported.
-
-I'll try to address these as time allows. PRs are most welcome.

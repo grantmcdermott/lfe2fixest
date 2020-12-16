@@ -83,8 +83,16 @@ mod4 = felm(y ~ 1 |
             data = aq
             )
 
+## Multiple IV
+mod5 = felm(y ~ 1 |
+              0 |
+              (x1|x2 ~ x3 + dy + mnth) |
+              dy,
+            data = aq
+            )
+
 ## Regression table
-mods = list(mod1, mod2, mod3, mod4)
+mods = list(mod1, mod2, mod3, mod4, mod5)
 msummary(mods, gof_omit = 'Pseudo|Within|Log|IC', output = 'markdown')
 "
 writeLines(lfe_string, 'lfe_script.R')
@@ -121,8 +129,11 @@ lfe2fixest('lfe_script.R')
 #> ## IV reg with weights
 #> mod4 = feols(y ~ 1 | dy | x1 ~ x3, cluster = ~mnth, weights = aq$x2, data = aq )
 #> 
+#> ## Multiple IV
+#> mod5 = feols(y ~ 1 | x1 + x2 ~ x3 + dy + mnth, cluster = ~dy, data = aq )
+#> 
 #> ## Regression table
-#> mods = list(mod1, mod2, mod3, mod4)
+#> mods = list(mod1, mod2, mod3, mod4, mod5)
 #> msummary(mods, gof_omit = 'Pseudo|Within|Log|IC', output = 'markdown')
 ```
 
@@ -149,21 +160,23 @@ First, the original **lfe** version:
 source('lfe_script.R', print.eval = TRUE)
 #> 
 #> 
-#> |             | Model 1 | Model 2 |  Model 3  | Model 4 |
-#> |:------------|:-------:|:-------:|:---------:|:-------:|
-#> |(Intercept)  | 77.246  |         |           |         |
-#> |             | (9.068) |         |           |         |
-#> |x1           |  0.100  |  0.099  |   0.099   |         |
-#> |             | (0.026) | (0.031) |  (0.029)  |         |
-#> |x2           | -5.402  | -5.577  |  -5.577   |         |
-#> |             | (0.673) | (1.100) |  (1.053)  |         |
-#> |`x1(fit)`    |         |         |           |  0.733  |
-#> |             |         |         |           | (0.254) |
-#> |Num.Obs.     |   111   |   111   |    111    |   111   |
-#> |R2           |  0.449  |  0.665  |   0.665   | -2.658  |
-#> |R2 Adj.      |  0.439  |  0.527  |   0.527   | -4.093  |
-#> |Cluster vars |         |  mnth   | dy + mnth |  mnth   |
-#> |FE:  dy      |         |    X    |     X     |    X    |
+#> |             | Model 1 | Model 2 |  Model 3  | Model 4 | Model 5  |
+#> |:------------|:-------:|:-------:|:---------:|:-------:|:--------:|
+#> |(Intercept)  | 77.246  |         |           |         |  93.452  |
+#> |             | (9.068) |         |           |         | (65.757) |
+#> |x1           |  0.100  |  0.099  |   0.099   |         |          |
+#> |             | (0.026) | (0.031) |  (0.029)  |         |          |
+#> |x2           | -5.402  | -5.577  |  -5.577   |         |          |
+#> |             | (0.673) | (1.100) |  (1.053)  |         |          |
+#> |`x1(fit)`    |         |         |           |  0.733  |  0.236   |
+#> |             |         |         |           | (0.254) | (0.179)  |
+#> |`x2(fit)`    |         |         |           |         |  -9.558  |
+#> |             |         |         |           |         | (3.510)  |
+#> |Num.Obs.     |   111   |   111   |    111    |   111   |   111    |
+#> |R2           |  0.449  |  0.665  |   0.665   | -2.658  |  0.071   |
+#> |R2 Adj.      |  0.439  |  0.527  |   0.527   | -4.093  |  0.054   |
+#> |Cluster vars |         |  mnth   | dy + mnth |  mnth   |    dy    |
+#> |FE:  dy      |         |    X    |     X     |    X    |          |
 ```
 
 Second, the **fixest** conversion:
@@ -172,21 +185,23 @@ Second, the **fixest** conversion:
 source('fixest_script.R', print.eval = TRUE)
 #> 
 #> 
-#> |            | Model 1  |     Model 2      |       Model 3       |     Model 4      |
-#> |:-----------|:--------:|:----------------:|:-------------------:|:----------------:|
-#> |(Intercept) |  77.246  |                  |                     |                  |
-#> |            | (9.068)  |                  |                     |                  |
-#> |x1          |  0.100   |      0.099       |        0.099        |                  |
-#> |            | (0.026)  |     (0.031)      |       (0.029)       |                  |
-#> |x2          |  -5.402  |      -5.577      |       -5.577        |                  |
-#> |            | (0.673)  |     (1.100)      |       (1.053)       |                  |
-#> |fit_x1      |          |                  |                     |      0.733       |
-#> |            |          |                  |                     |     (0.254)      |
-#> |Num.Obs.    |   111    |       111        |         111         |       111        |
-#> |R2          |  0.449   |      0.665       |        0.665        |      -2.658      |
-#> |R2 Adj.     |  0.439   |      0.527       |        0.527        |      -4.093      |
-#> |FE: dy      |          |        X         |          X          |        X         |
-#> |Std. errors | Standard | Clustered (mnth) | Two-way (dy & mnth) | Clustered (mnth) |
+#> |            | Model 1  |     Model 2      |       Model 3       |     Model 4      |    Model 5     |
+#> |:-----------|:--------:|:----------------:|:-------------------:|:----------------:|:--------------:|
+#> |(Intercept) |  77.246  |                  |                     |                  |     93.452     |
+#> |            | (9.068)  |                  |                     |                  |    (65.757)    |
+#> |x1          |  0.100   |      0.099       |        0.099        |                  |                |
+#> |            | (0.026)  |     (0.031)      |       (0.029)       |                  |                |
+#> |x2          |  -5.402  |      -5.577      |       -5.577        |                  |                |
+#> |            | (0.673)  |     (1.100)      |       (1.053)       |                  |                |
+#> |fit_x1      |          |                  |                     |      0.733       |     0.236      |
+#> |            |          |                  |                     |     (0.254)      |    (0.179)     |
+#> |fit_x2      |          |                  |                     |                  |     -9.558     |
+#> |            |          |                  |                     |                  |    (3.510)     |
+#> |Num.Obs.    |   111    |       111        |         111         |       111        |      111       |
+#> |R2          |  0.449   |      0.665       |        0.665        |      -2.658      |     0.071      |
+#> |R2 Adj.     |  0.439   |      0.527       |        0.527        |      -4.093      |     0.054      |
+#> |FE: dy      |          |        X         |          X          |        X         |                |
+#> |Std. errors | Standard | Clustered (mnth) | Two-way (dy & mnth) | Clustered (mnth) | Clustered (dy) |
 ```
 
 Some minor formatting differences aside, looks like it worked and we get
@@ -201,8 +216,7 @@ file.remove(c('lfe_script.R', 'fixest_script.R'))
 
 ## Caveats
 
-This package was thrown together pretty quickly. Current limitations
-include:
+Current limitations include:
 
 -   `feols()` offers a variety of optimised features and syntax for
     things like [varying
@@ -215,13 +229,15 @@ include:
     `felm()` formula. The goal is to get you up and running with as
     little pain as possible, rather than eking every extra bit out of
     `feols()`’s already eye-watering performance.
+-   The conversion only handles (or attempts to handle) the actual model
+    calls. No attempt is made to convert downstream objects or functions
+    like regression table construction. Although, as demonstrated in the
+    example, you should be okay if you use a modern table-generating
+    package like **modelsummary**. The same will not be true of
+    **stargazer**, for example.
 -   We assume that users always provide a dataset in their model calls
     (i.e.  regressions with global variables are not supported).
 -   Similarly, the package only supports models that are explicitly
     written out in a script. If your models are constructed
     programatically (e.g. with `Formula()`) then the conversion probably
     won’t work.
--   Multiple IV regressions (i.e. multiple endogenous variables) are not
-    yet supported.
-
-I’ll try to address these as time allows. PRs are most welcome.

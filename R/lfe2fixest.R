@@ -29,7 +29,7 @@
 #'   Note that the conversion only handles (or attempts to handle) the actual
 #'   model calls. No attempt is made to convert downstream objects or functions
 #'   like regression table construction. Although, you will probably be okay if
-#'   you use a modern table-generating package like `modesummary`.
+#'   you use a modern table-generating package like `modelsummary`.
 #'
 #'   Other limitations include: (1) The function more or less implements a
 #'   literal translation of the relevant `felm` model. It doesn't support
@@ -39,13 +39,9 @@
 #'   boosts and tricks that `feols()` offers. (2) The function assumes that
 #'   users always provide a dataset in their model calls; i.e. regressions with
 #'   global variables are not supported. (3) Similarly, models that are
-#'   constructed programatically (e.g. with `Formula()`) are not supported. (4)
-#'   The function does not yet handle multiple IV regression; i.e. multiple
-#'   endogenous variables.
+#'   constructed programatically (e.g. with `Formula()`) are not supported.
 #'
-#'   I'll try to address these limitations as time allows.
-#' @seealso \code{\link[lfe]{felm}}, \code{\link[fixest]{feols}},
-#'   \code{\link[modelsummary]{modelsummary}}.
+#' @seealso \code{\link[lfe]{felm}}, \code{\link[fixest]{feols}}.
 #' @return An R script.
 #' @export
 #' @examples
@@ -141,6 +137,25 @@ lfe2fixest =
 					suff = gsub(paste0(pref, fml), '', felm_call,	fixed = TRUE)
 
 					fml_split = strsplit(fml, '\\|')[[1]]
+
+					## Account for multiple IV with some very tedious regexp
+					tildas = grep('~', fml_split)
+					if (TRUE %in% (tildas > 1)) {
+						tildas = setdiff(tildas, 1)
+						if (tildas > 3) {
+							ne = tildas-3+1 ## adjust for how many endog vars there are
+							pre_iv = fml_split[1:(tildas-ne)]
+							iv_part = trimws(paste(fml_split[(tildas-ne+1):tildas], collapse = ' + '))
+							iv_part = sub(')$', '', iv_part)
+							if (length(fml_split)>=tildas+1) {
+								post_iv = fml_split[(tildas+1):length(fml_split)]
+							} else {
+								post_iv = NULL
+							}
+							fml_split = c(pre_iv, iv_part, post_iv)
+							rm(pre_iv, iv_part, post_iv)
+						}
+					}
 
 					main = trimws(fml_split[1])
 					add_fes = FALSE
