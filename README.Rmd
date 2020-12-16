@@ -112,7 +112,9 @@ provided, then it will just print the conversion results to screen.
 lfe2fixest('lfe_script.R')
 ```
 
-Looks good, let's write it to disk by supplying an output file this time.
+Looks good. Note that the `feols` (`felm`) model syntax has been cleaned up, 
+with comments removed and everything collapsed onto a single line. Let's write 
+it to disk by supplying an output file this time.
 
 ```{r fixest_script2}
 lfe2fixest(infile = 'lfe_script.R', outfile = 'fixest_script.R')

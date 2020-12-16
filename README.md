@@ -115,19 +115,20 @@ lfe2fixest('lfe_script.R')
 #> mod2 = feols(y ~ x1 + x2 | dy, cluster = ~mnth,  data = aq)
 #> 
 #> ## Add a second cluster variable and some estimation options
-#> mod3 = feols(y ~ x1 + x2 | dy, cluster = ~dy + mnth,  data =     ## Irrelevant option for feols (should be ignored)
+#> mod3 = feols(y ~ x1 + x2 | dy, cluster = ~dy + mnth,  data =
 #>             aq)
 #> 
 #> ## IV reg with weights
-#> mod4 = feols(y ~ 1 | dy | x1 ~ x3, cluster = ~mnth, weights = aq$x2, data = aq             )
+#> mod4 = feols(y ~ 1 | dy | x1 ~ x3, cluster = ~mnth, weights = aq$x2, data = aq )
 #> 
 #> ## Regression table
 #> mods = list(mod1, mod2, mod3, mod4)
 #> msummary(mods, gof_omit = 'Pseudo|Within|Log|IC', output = 'markdown')
 ```
 
-Looks good, let’s write it to disk by supplying an output file this
-time.
+Looks good. Note that the `feols` (`felm`) model syntax has been cleaned
+up, with comments removed and everything collapsed onto a single line.
+Let’s write it to disk by supplying an output file this time.
 
 ``` r
 lfe2fixest(infile = 'lfe_script.R', outfile = 'fixest_script.R')
