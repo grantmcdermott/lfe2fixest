@@ -210,11 +210,11 @@ include:
     [multiple
     estimation](https://cran.r-project.org/web/packages/fixest/vignettes/multiple_estimations.html),
     etc. that go beyond the standard R syntax (although the latter still
-    works. **lfe2fixest** doesn’t try to exploit any of these
+    works). **lfe2fixest** doesn’t try to exploit any of these
     specialised features. It’s more or less a literal translation of the
     `felm()` formula. The goal is to get you up and running with as
     little pain as possible, rather than eking every extra bit out of
-    `feols()`’s already amazing performance.
+    `feols()`’s already eye-watering performance.
 -   We assume that users always provide a dataset in their model calls
     (i.e.  regressions with global variables are not supported).
 -   Similarly, the package only supports models that are explicitly
