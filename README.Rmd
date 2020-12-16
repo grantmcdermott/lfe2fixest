@@ -106,7 +106,7 @@ lfe2fixest(infile = 'lfe_script.R', outfile = 'fixest_script.R')
 Note that the `lfe2fixest()` is a pure conversion function. It never actually
 runs anything from either the input or output files. That being, said here's a 
 quick comparison of the resulting regressions &mdash; i.e. what we get if we 
-actually *do* run the scripts). Note that my script(s) make use of the excellent 
+actually *do* run the scripts. Note that my scripts make use of the excellent 
 [**modelsummary**](https://vincentarelbundock.github.io/modelsummary/index.html) 
 package to generate the simple regression tables that you see below, although 
 we're really (really) not showing off its functionality here.
