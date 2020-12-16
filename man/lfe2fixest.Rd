@@ -87,7 +87,7 @@ writeLines(lfe_string, 'lfe_script.R')
 
 ## Covert to fixest equivalents
 lfe2fixest('lfe_script.R') ## no output file provided, will print to screen
-lfe2fixest('lfe_script.R', 'fixest_script.R') write converted script to disk
+lfe2fixest('lfe_script.R', 'fixest_script.R') ## write converted script to disk
 
 ## Check equivalence with regression tables
 library(modelsummary)
