@@ -80,7 +80,7 @@
 #'
 #' ## First the lfe version
 #' source('lfe_script.R')
-#' msummary(list(mod1, mod2, mod3, mod4), gof_omit = 'Psuedo|Log|IC'))
+#' msummary(list(mod1, mod2, mod3, mod4), gof_omit = 'Psuedo|Log|IC')
 #'
 #' ## Then the fixest conversion
 #' source('fixest_script.R')
