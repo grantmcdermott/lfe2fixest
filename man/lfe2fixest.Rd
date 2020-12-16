@@ -4,16 +4,16 @@
 \alias{lfe2fixest}
 \title{Converts \code{lfe::felm()} commands into their \code{fixest::feols()} equivalents.}
 \usage{
-lfe2fixest(infile, outfile = NULL, verbose = FALSE, robust = FALSE)
+lfe2fixest(infile = NULL, outfile = NULL, verbose = FALSE, robust = FALSE)
 }
 \arguments{
-\item{infile}{An R script containing \code{lfe::felm()} commands.}
+\item{infile}{An R script containing \code{lfe::felm()} commands. Required.}
 
 \item{outfile}{File or connection to write the resulting R script (i.e. with
-\code{fixest::feols()} conversion) to. Can be the same as the input script, in which case the
-the latter will obviously be overwritten. Can also be left blank in which
-case nothing will be written to disk and the output will simply be printed
-to screen.}
+\code{fixest::feols()} conversion) to. Can be the same as the input script, in
+which case the the latter will obviously be overwritten. Can also be left
+blank in which case nothing will be written to disk and the output will
+simply be printed to screen.}
 
 \item{verbose}{Logical. Should the result be printed to screen. Defaults to
 \code{FALSE} unless \code{outfile} above is left blank.}
@@ -34,71 +34,89 @@ script to disk. Conversion is the only thing it does. Neither the input
 not output script are run.
 }
 \details{
-Both \code{lfe::felm()} and \code{fixest::feols()} provide estimation routines
-for high-dimensional data. Both methods are highly optimised, although
-\code{feols()} is newer and tends to be quite a bit faster. The syntax between
-these two methods is similar, if not quite offering drop-in replacement.
-This function aims to automate the conversion process, ignoring non-relevant
-arguments and options between the two.
+\code{lfe::felm()} and \code{fixest::feols()} provide "fixed-effects"
+estimation routines for high-dimensional data. Both methods are highly
+optimised, although \code{feols()} is newer and tends to be quite a bit faster.
+The syntax between these two methods is similar, if not quite offering
+drop-in replacement. This function aims to automate the conversion process;
+ignoring non-relevant arguments and differing options between the two,
+while doing its best to ensure that the resulting scripts will produce the
+same output.
 
 Note that the conversion only handles (or attempts to handle) the actual
 model calls. No attempt is made to convert downstream objects or functions
 like regression table construction. Although, you will probably be okay if
 you use a modern table-generating package like \code{modesummary}.
 
-Other limitations include: (1) \code{lfe2fixest()} assumes that users provide a
-dataset in their model calls (i.e. regressions with global variables are
-not supported). (2) \code{lfe2fixest()} does not yet handle multiple IV
-regression. (3) Comments inside the \code{felm()} model call are liable to mess
-things up. I'll try to address these as time allows.
+Other limitations include: (1) The function more or less implements a
+literal translation of the relevant \code{felm} model. It doesn't support
+translation for some of the specialised syntax that \code{feols()} offers, e.g.
+multiple estimation and varying slopes. Everything should still work even
+if the literal translation doesn't yield all of the additional performance
+boosts and tricks that \code{feols()} offers. (2) The function assumes that
+users always provide a dataset in their model calls; i.e. regressions with
+global variables are not supported. (3) Similarly, models that are
+constructed programatically (e.g. with \code{Formula()}) are not supported. (4)
+The function does not yet handle multiple IV regression; i.e. multiple
+endogenous variables.
+
+I'll try to address these limtations as time allows.
 }
 \examples{
 \dontrun{
 ## Write a (deliberately messy) lfe script
-lfe_string =
-  "library(lfe)
+lfe_string = "
+library(lfe)
+library(modelsummary)
 
-  	aq = airquality
-  	names(aq) = c('y', 'x1', 'x2', 'x3', 'mnth', 'dy')
+## Our toy dataset
+aq = airquality
+names(aq) = c('y', 'x1', 'x2', 'x3', 'mnth', 'dy')
 
-   mod1 = felm(y ~ x1 + x2, aq)
+## Simple OLS (no FEs)
+mod1 = felm(y ~ x1 + x2, aq)
 
-   mod2 = felm(y ~ x1 + x2 |
-     dy |
-     0 |
-     mnth, aq)
+## Add a FE and cluster variable
+mod2 = felm(y ~ x1 + x2 |
+              dy |
+              0 |
+              mnth, aq)
 
-   mod3 = felm(y ~ x1 + x2 |
-     0 |
-     0 |
-     dy + mnth,
-     aq)
+## Add a second cluster variable and some estimation options
+mod3 = felm(y ~ x1 + x2 |
+              dy |
+              0 |
+              dy + mnth,
+            cmethod = 'reghdfe',
+            exactDOF = TRUE,
+            aq)
 
-   mod4 = felm(y ~ 1 |
-     dy |
-     (x1 ~ x3) |
-     mnth,
-     weights = aq$x2,
-     cmethod = 'reghdfe',
-     exactDOF = TRUE,
-     data = aq
-     )"
+## IV reg with weights
+mod4 = felm(y ~ 1 |
+              dy |
+              (x1 ~ x3) |
+              mnth,
+            weights = aq$x2,
+            data = aq
+            )
+
+## Regression table
+mods = list(mod1, mod2, mod3, mod4)
+msummary(mods, gof_omit = 'Pseudo|Within|Log|IC', output = 'markdown')
+"
 writeLines(lfe_string, 'lfe_script.R')
 
 ## Covert to fixest equivalents
 lfe2fixest('lfe_script.R') ## no output file provided, will print to screen
 lfe2fixest('lfe_script.R', 'fixest_script.R') ## write converted script to disk
 
-## Check equivalence with regression tables
-library(modelsummary)
+## Check equivalence
 
 ## First the lfe version
-source('lfe_script.R')
-msummary(list(mod1, mod2, mod3, mod4), gof_omit = 'Psuedo|Log|IC')
+source('lfe_script.R', print.eval = TRUE)
 
 ## Then the fixest conversion
-source('fixest_script.R')
-msummary(list(mod1, mod2, mod3, mod4), gof_omit = 'Psuedo|Log|IC')
+source('fixest_script.R', print.eval = TRUE)
 
 ## Clean up
 file.remove(c('lfe_script.R', 'fixest_script.R'))

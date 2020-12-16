@@ -16,10 +16,10 @@ Why would you want to do this?
 Both `lfe::felm()` and `fixest::feols()` provide “fixed-effects”
 estimation routines for high-dimensional data. Both methods are also
 highly optimised. However, `feols()` is newer, tends to be significantly
-faster and allows for additional functionality (e.g. a `predict`
+faster, and allows for additional functionality (e.g. a `predict`
 method). At the time writing this conversion package, **lfe** has also
 been (temporarily) removed from CRAN after a period of stasis, leading
-to downstream problems.
+to downstream issues.
 
 The syntax between `lfe::felm()` and `fixest::feols()` is similar, if
 not quite offering a drop-in replacement. This package therefore aims to
@@ -70,8 +70,8 @@ mod3 = felm(y ~ x1 + x2 |
               dy |
               0 |
               dy + mnth,
-            cmethod = 'reghdfe',
-            exactDOF = TRUE,
+            cmethod = 'reghdfe', ## Also the same as feols
+            exactDOF = TRUE,     ## Irrelevant option for feols (should be ignored)
             aq)
 
 ## IV reg with weights
@@ -115,7 +115,8 @@ lfe2fixest('lfe_script.R')
 #> mod2 = feols(y ~ x1 + x2 | dy, cluster = ~mnth,  data = aq)
 #> 
 #> ## Add a second cluster variable and some estimation options
-#> mod3 = feols(y ~ x1 + x2 | dy, cluster = ~dy + mnth,  data =             aq)
+#> mod3 = feols(y ~ x1 + x2 | dy, cluster = ~dy + mnth,  data =     ## Irrelevant option for feols (should be ignored)
+#>             aq)
 #> 
 #> ## IV reg with weights
 #> mod4 = feols(y ~ 1 | dy | x1 ~ x3, cluster = ~mnth, weights = aq$x2, data = aq             )
@@ -135,13 +136,13 @@ lfe2fixest(infile = 'lfe_script.R', outfile = 'fixest_script.R')
 Note that the `lfe2fixest()` is a pure conversion function. It never
 actually runs anything from either the input or output files. That
 being, said here’s a quick comparison of the resulting regressions —
-i.e. what we get if we actually *do* run the scripts. Note that my
+i.e. what we get if we actually *do* run the scripts. As an aside, my
 scripts make use of the excellent
 [**modelsummary**](https://vincentarelbundock.github.io/modelsummary/index.html)
 package to generate the simple regression tables that you see below,
-although we’re really (really) not showing off its functionality here.
+although we’re really not showing off its functionality here.
 
-First the lfe version:
+First, the original **lfe** version:
 
 ``` r
 source('lfe_script.R', print.eval = TRUE)
@@ -164,7 +165,7 @@ source('lfe_script.R', print.eval = TRUE)
 #> |FE:  dy      |         |    X    |     X     |    X    |
 ```
 
-Then the fixest conversion:
+Second, the **fixest** conversion:
 
 ``` r
 source('fixest_script.R', print.eval = TRUE)
@@ -202,13 +203,24 @@ file.remove(c('lfe_script.R', 'fixest_script.R'))
 This package was thrown together pretty quickly. Current limitations
 include:
 
--   `lfe2fixest()` assumes that users provide a dataset in their model
-    calls (i.e.  regressions with global variables are not supported).
--   `lfe2fixest()` does not yet handle multiple IV regression.
--   Comments inside the original `felm()` model call are liable to mess
-    things up.
--   It only supports models that are explicitly written out in the
-    script. If your models are constructed programatically (e.g. with
-    `Formula()`) then it probably won’t work.
+-   `feols()` offers a variety of optimised features and syntax for
+    things like [varying
+    slopes](https://cran.r-project.org/web/packages/fixest/vignettes/fixest_walkthrough.html#31_Varying_slopes),
+    [multiple
+    estimation](https://cran.r-project.org/web/packages/fixest/vignettes/multiple_estimations.html),
+    etc. that go beyond the standard R syntax (although the latter still
+    works. **lfe2fixest** doesn’t try to exploit any of these
+    specialised features. It’s more or less a literal translation of the
+    `felm()` formula. The goal is to get you up and running with as
+    little pain as possible, rather than eking every extra bit out of
+    `feols()`’s already amazing performance.
+-   We assume that users always provide a dataset in their model calls
+    (i.e.  regressions with global variables are not supported).
+-   Similarly, the package only supports models that are explicitly
+    written out in a script. If your models are constructed
+    programatically (e.g. with `Formula()`) then the conversion probably
+    won’t work.
+-   Multiple IV regressions (i.e. multiple endogenous variables) are not
+    yet supported.
 
 I’ll try to address these as time allows. PRs are most welcome.
