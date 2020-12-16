@@ -20,12 +20,12 @@ knitr::opts_chunk$set(
 
 The goal of **lfe2fixest** is to take R scripts that rely on the `felm()` function 
 from the [**lfe**](https://github.com/sgaure/lfe) package and convert 
-them to the `feols()` equivalent from [**fixest**](https://github.com/lrberge/fixest) 
-package.
+them to their `feols()` equivalents from the 
+[**fixest**](https://github.com/lrberge/fixest) package.
 
 ## Installation
 
-Install the package from [GitHub](https://github.com/) with:
+Install the package from GitHub:
 
 ``` r
 # install.packages("remotes")
@@ -33,73 +33,100 @@ remotes::install_github("grantmcdermott/lfe2fixest")
 ```
 ## Example
 
-Let's create a (deliberately messy) **lfe**-based R script.
+Start by loading the package.
+
+```{r libs}
+library(lfe2fixest)
+```
+
+
+Let's create a **lfe**-based R script, that's deliberately messy (inconsistent
+formatting, etc.)
 
 ```{r lfe_script}
-lfe_string =
-  "library(lfe)
+lfe_string = "
+library(lfe)
+library(modelsummary)
 
-  	aq = airquality
-  	names(aq) = c('y', 'x1', 'x2', 'x3', 'mnth', 'dy')
+## Our toy dataset
+aq = airquality
+names(aq) = c('y', 'x1', 'x2', 'x3', 'mnth', 'dy')
 
-   mod1 = felm(y ~ x1 + x2, aq)
+## Simple OLS (no FEs)
+mod1 = felm(y ~ x1 + x2, aq)
 
-   mod2 = felm(y ~ x1 + x2 |
-     dy |
-     0 |
-     mnth, aq)
+## Add a FE and cluster variable
+mod2 = felm(y ~ x1 + x2 |
+              dy |
+              0 |
+              mnth, aq)
 
-   mod3 = felm(y ~ x1 + x2 |
-     0 |
-     0 |
-     dy + mnth,
-     aq)
+## Add a second cluster variable and some estimation options
+mod3 = felm(y ~ x1 + x2 |
+              dy |
+              0 |
+              dy + mnth,
+            cmethod = 'reghdfe',
+            exactDOF = TRUE,
+            aq)
 
-   mod4 = felm(y ~ 1 |
-     dy |
-     (x1 ~ x3) |
-     mnth,
-     weights = aq$x2,
-     cmethod = 'reghdfe',
-     exactDOF = TRUE,
-     data = aq
-     )"
+## IV reg with weights
+mod4 = felm(y ~ 1 |
+              dy |
+              (x1 ~ x3) |
+              mnth,
+            weights = aq$x2,
+            data = aq
+            )
+
+## Regression table
+mods = list(mod1, mod2, mod3, mod4)
+msummary(mods, gof_omit = 'Pseudo|Within|Log|IC', output = 'markdown')
+"
 writeLines(lfe_string, 'lfe_script.R')
 ```
 
-We can convert it to something that is **fixest** friendly using the package's
-main (only!) function, `lfe2fixest::lfe2fixest()`.
+We can convert it to something that is **fixest**-friendly using the package's
+main (only!) function, `lfe2fixest::lfe2fixest()`. 
 
-```{r fixest_script}
-library(lfe2fixest)
+While the function accepts several arguments, the most important (and only
+required) one is an input file. Similarly, if no output file argument is 
+provided, then it will just print the conversion results to screen.
 
-## If no output file provided, it will print to screen
+```{r fixest_script1}
 lfe2fixest('lfe_script.R')
+```
 
-## Looks good, let's write it to disk by supplying the output file
-lfe2fixest('lfe_script.R', 'fixest_script.R')
+Looks good, let's write it to disk by supplying an output file this time.
+
+```{r fixest_script2}
+lfe2fixest(infile = 'lfe_script.R', outfile = 'fixest_script.R')
 ```
 
 Note that the `lfe2fixest()` is a pure conversion function. It never actually
-runs anything from the input or output scripts. That being, said, here's a quick 
-comparison of resulting regressions (i.e. what we get if we do actually run the 
-scripts) using the excellent **modelsummary** package.
+runs anything from either the input or output files. That being, said here's a 
+quick comparison of the resulting regressions &mdash; i.e. what we get if we 
+actually *do* run the scripts). Note that my script(s) make use of the excellent 
+[**modelsummary**](https://vincentarelbundock.github.io/modelsummary/index.html) 
+package to generate the simple regression tables that you see below, although 
+we're really (really) not showing off its functionality here.
 
-```{r comparison}
-library(modelsummary)
+First the lfe version:
 
-## First the lfe version
-source('lfe_script.R')
-msummary(list(mod1, mod2, mod3, mod4), gof_omit = 'Psuedo|Log|IC',
-				 output = 'markdown')
-
-## Then the fixest conversion
-source('fixest_script.R')
-msummary(list(mod1, mod2, mod3, mod4), gof_omit = 'Psuedo|Log|IC',
-				 output = 'markdown')
+```{r comparison, message  = FALSE}
+source('lfe_script.R', print.eval = TRUE)
 ```
 
-Finally, clean up.
+Then the fixest conversion:
+
+```{r comparison2, message  = FALSE}
+source('fixest_script.R', print.eval = TRUE)
+```
+
+Some minor formatting differences aside, looks like it worked and we get the
+exact same results from both scripts. Great!
+
+Let's clean up before continuing.
 
 ```{r cleanup}
 file.remove(c('lfe_script.R', 'fixest_script.R'))
@@ -112,7 +139,9 @@ This package was thrown together pretty quickly. Current limitations include:
 - `lfe2fixest()` assumes that users provide a dataset in their model calls (i.e. 
 regressions with global variables are not supported). 
 - `lfe2fixest()` does not yet handle multiple IV regression. 
-- Comments inside the `felm()` model call are liable to mess things up. 
+- Comments inside the original `felm()` model call are liable to mess things up. 
+- It only supports models that are explicitly written out in the script. If
+your models are constructed programatically (e.g. with `Formula()`) then it
+probably won't work.
 
 I'll try to address these as time allows. PRs are most welcome.
-
