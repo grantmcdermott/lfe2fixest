@@ -31,7 +31,7 @@ not necessarily providing a drop-in replacement for the other. For
 example, the following two lines of code are functionally equivalent
 versions of the same underlying model.<sup id="a1">[1](#f1)</sup>
 
--   `felm(y ~ x1 + x2 | fe1 + fe2 | (x3|x4) ~ z1 + z2 | cl1, data = dat)`
+-   `felm(y ~ x1 + x2 | fe1 + fe2 | (x3 | x4 ~ z1 + z2) | cl1, data = dat)`
 -   `feols(y ~ x1 + x2 | fe1 + fe2 | c(x3, x4) ~ z1 + z2, cluster = ~cl1, data = dat)`
 
 The **lfe2fixest** package automates the translation between these kinds
@@ -113,10 +113,9 @@ writeLines(lfe_string, 'lfe_script.R')
 
 We can now convert this script to the **fixest** equivalent using the
 package’s main function, `lfe2fixest()`, or its alias, `felm2feols()`.
-
-While the function accepts several arguments, the most important (and
-only required) one is an input file. Similarly, if no output file
-argument is provided, then it will just print the conversion results to
+While the function(s) accept several arguments, the only required
+argument is an input file. Similarly, if no output file argument is
+provided, then the function(s) will just print the conversion results to
 screen.
 
 ``` r
