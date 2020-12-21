@@ -18,6 +18,10 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
+[`Motivation`](#motivation) [`Installation`](#installation) [`Example`](#example) [`Caveats`](#caveats)
+
+## Motivation
+
 The goal of **lfe2fixest** is to take R scripts that rely on the `felm()` function 
 from the [**lfe**](https://github.com/sgaure/lfe) package and convert 
 them to their `feols()` equivalents from the 
@@ -35,19 +39,20 @@ a period of stasis, leading to a variety of downstream issues.
 The syntax between `felm()` and `feols()` is similar, albeit with one not
 necessarily providing a drop-in replacement for the other. For example, the 
 following two lines of code are functionally equivalent versions of the same
-underlying model:
+underlying model.<sup id="a1">[1](#f1)</sup>
 
-- `felm(y ~ x1 + x2 | fe1 + fe2 | (x3|x4) ~ z1 + z2 | cl1)`
-- `feols(y ~ x1 + x2 | fe1 + fe2 | c(x3, x4) ~ z1 + z2, cluster = ~cl1)`
+- `felm(y ~ x1 + x2 | fe1 + fe2 | (x3|x4) ~ z1 + z2 | cl1, data = dat)`
+- `feols(y ~ x1 + x2 | fe1 + fe2 | c(x3, x4) ~ z1 + z2, cluster = ~cl1, data = dat)`
 
 The **lfe2fixest** package automates the translation between these kinds of
-models. It does its best to ignoring any non-relevant arguments or adjust for
+models. It does its best to ignoring any non-relevant arguments and adjust for
 differing syntax options between `felm()` and `feols()`. The end goal is a 
-converted R script that will produce the same output.
+converted R script that will produce exactly the same output, some minor
+[caveats](#caveats) notwithstanding.
 
 ## Installation
 
-Install the package from GitHub:
+Install the package directly from GitHub:
 
 ``` r
 # install.packages("remotes")
@@ -117,26 +122,28 @@ writeLines(lfe_string, 'lfe_script.R')
 ```
 
 We can now convert this script to the **fixest** equivalent using the package's
-main function, `lfe2fixest()` (or its alias, `felm2feols()`). 
+main function, `lfe2fixest()`, or its alias, `felm2feols()`. 
 
 While the function accepts several arguments, the most important (and only
 required) one is an input file. Similarly, if no output file argument is 
 provided, then it will just print the conversion results to screen.
 
 ```{r fixest_script1}
+# felm2feols('lfe_script.R') ## same thing
 lfe2fixest('lfe_script.R')
 ```
 
 Looks good. Note that the `feols` (`felm`) model syntax has been cleaned up, 
-with comments removed and everything collapsed onto a single line. Let's write 
-it to disk by supplying an output file this time.
+with comments removed and everything collapsed onto a single line.<sup id="a2">[2](#f2)</sup> 
+Let's write it to disk by supplying an output file this time.
 
 ```{r fixest_script2}
+# felm2feols(infile = 'lfe_script.R', outfile = 'fixest_script.R') ## same thing
 lfe2fixest(infile = 'lfe_script.R', outfile = 'fixest_script.R')
 ```
 
 Note that the `lfe2fixest()` is a pure conversion function. It never actually
-runs anything from either the input or output files. That being, said here's a 
+runs anything from either the input or output files. That being said, here's a 
 quick comparison of the resulting regressions &mdash; i.e. what we get if we 
 actually *do* run the scripts. As an aside, my scripts make use of the excellent 
 [**modelsummary**](https://vincentarelbundock.github.io/modelsummary/index.html) 
@@ -166,7 +173,8 @@ file.remove(c('lfe_script.R', 'fixest_script.R'))
 
 ## Caveats
 
-Current limitations include:
+While I'm confident that **lfe2fixest** will work out-of-the-box in most (9 out 
+of 10?) situations, there are some minor caveats to bear in mind.
 
 - `feols()` offers a variety of optimised features and syntax for things like 
 [varying slopes](https://cran.r-project.org/web/packages/fixest/vignettes/fixest_walkthrough.html#31_Varying_slopes), 
@@ -176,13 +184,26 @@ etc. that go beyond the standard R syntax (although the latter still works).
 more or less a literal translation of the `felm()` formula. The goal is to get 
 you up and running with as little pain as possible, rather than eking every 
 extra bit out of `feols()`'s already eye-watering performance.
+- Similarly, because `felm()` and `feols()` do not share all of the same 
+arguments, there are cases where the conversion can yield different results. An
+example would be in the case of multiway clustering where the `felm()` call does
+not specify the right `cmethod` option. (More
+[here](https://github.com/sgaure/lfe/pull/26) and
+[here](https://cran.r-project.org/web/packages/fixest/vignettes/standard_errors.html).)
 - The conversion only handles (or attempts to handle) the actual model calls. No 
 attempt is made to convert downstream objects or functions like regression table 
 construction. Although, as demonstrated in the example, you should be okay if 
-you use a modern table-generating package like **modelsummary**. The same will 
-not be true of **stargazer**, for example.
-- We assume that users always provide a dataset in their model calls (i.e. 
+you use a modern table-generating package like **modelsummary**. But the same 
+would not be true of **stargazer**, for example.
+- I assume that users always provide a dataset in their model calls (i.e. 
 regressions with global variables are not supported). 
 - Similarly, the package only supports models that are explicitly written out in 
 a script. If your models are constructed programatically (e.g. with `Formula()`) 
 then the conversion probably won't work.
+
+<sup><b id="f1">1</b></sup> An IV regression with multiple endogenous variables
+and fixed effects, as well as clustered standard errors. But that's besides the
+point.[↩](#a1)
+
+<sup><b id="f2">2</b></sup> The loss of inline comments is a little unfortunate, 
+but necessary given the way that the function parses input.[↩](#a2)
