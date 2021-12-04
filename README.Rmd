@@ -25,16 +25,15 @@ knitr::opts_chunk$set(
 The goal of **lfe2fixest** is to take R scripts that rely on the `felm()` function 
 from the [**lfe**](https://github.com/sgaure/lfe) package and convert 
 them to their `feols()` equivalents from the 
-[**fixest**](https://github.com/lrberge/fixest) package.
+[**fixest**](https://lrberge.github.io/fixest) package.
 
 Why would you want to do this?
 
 Both `lfe::felm()` and `fixest::feols()` provide "fixed-effects" estimation 
 routines for high-dimensional data. Both methods are also highly optimised. 
 However, `feols()` is newer, tends to be significantly faster, and allows for 
-additional functionality (e.g. a `predict` method). At the time of writing this 
-conversion package, **lfe** has also been (temporarily) removed from CRAN after
-a period of stasis, leading to a variety of downstream issues.
+additional functionality (e.g. a `predict` method). At the same time, the 
+primary author of **lfe** has stopped developing the package. It has since been adopted, but is essentially in pure maintenance mode.
 
 The syntax between `felm()` and `feols()` is similar, albeit with one not
 necessarily providing a drop-in replacement for the other. For example, the 
@@ -60,10 +59,15 @@ remotes::install_github("grantmcdermott/lfe2fixest")
 ```
 ## Example
 
-Start by loading the package.
+Start by loading this package. Note the example scripts that follow assume you 
+have both *lfe* and **fixest**, as well as **modelsummary** installed on your system.
 
 ```{r libs}
-library(lfe2fixest)
+library(lfe2fixest) ## This package
+
+## Aside: Make sure you have the following packages installed on your system if
+## you want to run the example scripts below:
+## library(lfe); library(fixest); library(modelsummary)
 ```
 
 

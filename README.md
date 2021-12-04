@@ -14,7 +14,7 @@
 The goal of **lfe2fixest** is to take R scripts that rely on the
 `felm()` function from the [**lfe**](https://github.com/sgaure/lfe)
 package and convert them to their `feols()` equivalents from the
-[**fixest**](https://github.com/lrberge/fixest) package.
+[**fixest**](https://lrberge.github.io/fixest) package.
 
 Why would you want to do this?
 
@@ -22,9 +22,9 @@ Both `lfe::felm()` and `fixest::feols()` provide “fixed-effects”
 estimation routines for high-dimensional data. Both methods are also
 highly optimised. However, `feols()` is newer, tends to be significantly
 faster, and allows for additional functionality (e.g. a `predict`
-method). At the time of writing this conversion package, **lfe** has
-also been (temporarily) removed from CRAN after a period of stasis,
-leading to a variety of downstream issues.
+method). At the same time, the primary author of **lfe** has stopped
+developing the package. It has since been adopted, but is essentially in
+pure maintenance mode.
 
 The syntax between `felm()` and `feols()` is similar, albeit with one
 not necessarily providing a drop-in replacement for the other. For
@@ -51,10 +51,16 @@ remotes::install_github("grantmcdermott/lfe2fixest")
 
 ## Example
 
-Start by loading the package.
+Start by loading this package. Note the example scripts that follow
+assume you have both *lfe* and **fixest**, as well as **modelsummary**
+installed on your system.
 
 ``` r
-library(lfe2fixest)
+library(lfe2fixest) ## This package
+
+## Aside: Make sure you have the following packages installed on your system if
+## you want to run the example scripts below:
+## library(lfe); library(fixest); library(modelsummary)
 ```
 
 Let’s create an **lfe**-based R script, that’s deliberately messy to
@@ -175,23 +181,22 @@ First, the original **lfe** version:
 source('lfe_script.R', print.eval = TRUE)
 #> 
 #> 
-#> |             | Model 1 | Model 2 |  Model 3  | Model 4 | Model 5  |
-#> |:------------|:-------:|:-------:|:---------:|:-------:|:--------:|
-#> |(Intercept)  | 77.246  |         |           |         |  93.452  |
-#> |             | (9.068) |         |           |         | (65.757) |
-#> |x1           |  0.100  |  0.099  |   0.099   |         |          |
-#> |             | (0.026) | (0.031) |  (0.029)  |         |          |
-#> |x2           | -5.402  | -5.577  |  -5.577   |         |          |
-#> |             | (0.673) | (1.100) |  (1.053)  |         |          |
-#> |`x1(fit)`    |         |         |           |  0.733  |  0.236   |
-#> |             |         |         |           | (0.254) | (0.179)  |
-#> |`x2(fit)`    |         |         |           |         |  -9.558  |
-#> |             |         |         |           |         | (3.510)  |
-#> |Num.Obs.     |   111   |   111   |    111    |   111   |   111    |
-#> |R2           |  0.449  |  0.665  |   0.665   | -2.658  |  0.071   |
-#> |R2 Adj.      |  0.439  |  0.527  |   0.527   | -4.093  |  0.054   |
-#> |Cluster vars |         |  mnth   | dy + mnth |  mnth   |    dy    |
-#> |FE:  dy      |         |    X    |     X     |    X    |          |
+#> |            | Model 1 | Model 2  |    Model 3    | Model 4  | Model 5  |
+#> |:-----------|:-------:|:--------:|:-------------:|:--------:|:--------:|
+#> |(Intercept) | 77.246  |          |               |          |  93.452  |
+#> |            | (9.068) |          |               |          | (65.757) |
+#> |x1          |  0.100  |  0.099   |     0.099     |          |          |
+#> |            | (0.026) | (0.031)  |    (0.029)    |          |          |
+#> |x2          | -5.402  |  -5.577  |    -5.577     |          |          |
+#> |            | (0.673) | (1.100)  |    (1.053)    |          |          |
+#> |`x1(fit)`   |         |          |               |  0.733   |  0.236   |
+#> |            |         |          |               | (0.254)  | (0.179)  |
+#> |`x2(fit)`   |         |          |               |          |  -9.558  |
+#> |            |         |          |               |          | (3.510)  |
+#> |Num.Obs.    |   111   |   111    |      111      |   111    |   111    |
+#> |R2          |  0.449  |  0.665   |     0.665     |  -2.658  |  0.071   |
+#> |R2 Adj.     |  0.439  |  0.527   |     0.527     |  -4.093  |  0.054   |
+#> |Std.Errors  |         | by: mnth | by: dy & mnth | by: mnth |  by: dy  |
 ```
 
 Second, the **fixest** conversion:
@@ -200,23 +205,23 @@ Second, the **fixest** conversion:
 source('fixest_script.R', print.eval = TRUE)
 #> 
 #> 
-#> |            | Model 1  |     Model 2      |       Model 3       |     Model 4      |    Model 5     |
-#> |:-----------|:--------:|:----------------:|:-------------------:|:----------------:|:--------------:|
-#> |(Intercept) |  77.246  |                  |                     |                  |     93.452     |
-#> |            | (9.068)  |                  |                     |                  |    (65.757)    |
-#> |x1          |  0.100   |      0.099       |        0.099        |                  |                |
-#> |            | (0.026)  |     (0.031)      |       (0.029)       |                  |                |
-#> |x2          |  -5.402  |      -5.577      |       -5.577        |                  |                |
-#> |            | (0.673)  |     (1.100)      |       (1.053)       |                  |                |
-#> |fit_x1      |          |                  |                     |      0.733       |     0.236      |
-#> |            |          |                  |                     |     (0.254)      |    (0.179)     |
-#> |fit_x2      |          |                  |                     |                  |     -9.558     |
-#> |            |          |                  |                     |                  |    (3.510)     |
-#> |Num.Obs.    |   111    |       111        |         111         |       111        |      111       |
-#> |R2          |  0.449   |      0.665       |        0.665        |      -2.658      |     0.071      |
-#> |R2 Adj.     |  0.439   |      0.527       |        0.527        |      -4.093      |     0.054      |
-#> |FE: dy      |          |        X         |          X          |        X         |                |
-#> |Std. errors | Standard | Clustered (mnth) | Two-way (dy & mnth) | Clustered (mnth) | Clustered (dy) |
+#> |            | Model 1 | Model 2  |    Model 3    | Model 4  | Model 5  |
+#> |:-----------|:-------:|:--------:|:-------------:|:--------:|:--------:|
+#> |(Intercept) | 77.246  |          |               |          |  93.452  |
+#> |            | (9.068) |          |               |          | (65.757) |
+#> |x1          |  0.100  |  0.099   |     0.099     |          |          |
+#> |            | (0.026) | (0.031)  |    (0.029)    |          |          |
+#> |x2          | -5.402  |  -5.577  |    -5.577     |          |          |
+#> |            | (0.673) | (1.100)  |    (1.053)    |          |          |
+#> |fit_x1      |         |          |               |  0.733   |  0.236   |
+#> |            |         |          |               | (0.254)  | (0.179)  |
+#> |fit_x2      |         |          |               |          |  -9.558  |
+#> |            |         |          |               |          | (3.510)  |
+#> |Num.Obs.    |   111   |   111    |      111      |   111    |   111    |
+#> |R2          |  0.449  |  0.665   |     0.665     |  -2.658  |  0.071   |
+#> |R2 Adj.     |  0.439  |  0.527   |     0.527     |  -4.093  |  0.054   |
+#> |Std.Errors  |   IID   | by: mnth | by: dy & mnth | by: mnth |  by: dy  |
+#> |FE: dy      |         |    X     |       X       |    X     |          |
 ```
 
 Some minor formatting differences aside, looks like it worked and we get
