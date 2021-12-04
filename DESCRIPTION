@@ -17,4 +17,5 @@ URL: https://github.com/grantmcdermott/lfe2fixest
 BugReports: https://github.com/grantmcdermott/lfe2fixest/issues
 Suggests: 
     fixest,
-    felm
+    felm,
+    modelsummary
