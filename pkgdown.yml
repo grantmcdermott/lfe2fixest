@@ -3,7 +3,7 @@ pkgdown: 2.0.1
 pkgdown_sha: ~
 articles:
   lfe2fixest: lfe2fixest.html
-last_built: 2021-12-04T07:10Z
+last_built: 2021-12-04T07:11Z
 urls:
   reference: http://grantmcdermott.com/lfe2fixest/reference
   article: http://grantmcdermott.com/lfe2fixest/articles
