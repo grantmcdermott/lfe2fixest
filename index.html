@@ -36,6 +36,9 @@
     <div id="navbar" class="collapse navbar-collapse ms-2">
       <ul class="navbar-nav me-auto">
 <li class="nav-item">
+  <a class="nav-link" href="articles/lfe2fixest.html">Get started</a>
+</li>
+<li class="nav-item">
   <a class="nav-link" href="reference/index.html">Reference</a>
 </li>
 <li class="nav-item">
@@ -64,21 +67,8 @@
 <div class="page-header"><h1 id="lfe2fixest">lfe2fixest<a class="anchor" aria-label="anchor" href="#lfe2fixest"></a>
 </h1></div>
 <!-- badges: start -->
-<!-- badges: end -->
-<p><a href="#motivation"><code>Motivation</code></a> <a href="#installation"><code>Installation</code></a> <a href="#example"><code>Example</code></a> <a href="#caveats"><code>Caveats</code></a></p>
-<div class="section level2">
-<h2 id="motivation">Motivation<a class="anchor" aria-label="anchor" href="#motivation"></a>
-</h2>
-<p>The goal of <strong>lfe2fixest</strong> is to take R scripts that rely on the <code>felm()</code> function from the <a href="https://github.com/sgaure/lfe" class="external-link"><strong>lfe</strong></a> package and convert them to their <code>feols()</code> equivalents from the <a href="https://lrberge.github.io/fixest" class="external-link"><strong>fixest</strong></a> package.</p>
-<p>Why would you want to do this?</p>
-<p>Both <code><a href="https://rdrr.io/pkg/lfe/man/felm.html" class="external-link">lfe::felm()</a></code> and <code><a href="https://lrberge.github.io/fixest/reference/feols.html" class="external-link">fixest::feols()</a></code> provide “fixed-effects” estimation routines for high-dimensional data. Both methods are also highly optimised. However, <code>feols()</code> is newer, tends to be significantly faster, and allows for additional functionality (e.g. a <code>predict</code> method). At the same time, the primary author of <strong>lfe</strong> has stopped developing the package. It has since been adopted, but is essentially in pure maintenance mode.</p>
-<p>The syntax between <code>felm()</code> and <code>feols()</code> is similar, albeit with one not necessarily providing a drop-in replacement for the other. For example, the following two lines of code are functionally equivalent versions of the same underlying model.<sup id="a1"><a href="#f1">1</a></sup></p>
-<ul>
-<li><code>felm(y ~ x1 + x2 | fe1 + fe2 | (x3 | x4 ~ z1 + z2) | cl1, data = dat)</code></li>
-<li><code>feols(y ~ x1 + x2 | fe1 + fe2 | c(x3, x4) ~ z1 + z2, cluster = ~cl1, data = dat)</code></li>
-</ul>
-<p>The <strong>lfe2fixest</strong> package automates the translation between these kinds of models. It does its best to ignoring any non-relevant arguments and adjust for differing syntax options between <code>felm()</code> and <code>feols()</code>. The end goal is a converted R script that will produce exactly the same output, some minor <a href="#caveats">caveats</a> notwithstanding.</p>
-</div>
+
+<p><a href="#installation"><code>Installation</code></a> | <a href="#motivation"><code>Motivation</code></a> | <a href="#example"><code>Example</code></a> | <a href="#caveats"><code>Caveats</code></a></p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -88,103 +78,22 @@
 <span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"grantmcdermott/lfe2fixest"</span><span class="op">)</span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="motivation">Motivation<a class="anchor" aria-label="anchor" href="#motivation"></a>
+</h2>
+<p>The goal of <strong>lfe2fixest</strong> is to take R scripts that rely on the <code>felm()</code> function from the <a href="https://github.com/sgaure/lfe" class="external-link"><strong>lfe</strong></a> package and convert them to their <code>feols()</code> equivalents from the <a href="https://lrberge.github.io/fixest" class="external-link"><strong>fixest</strong></a> package.</p>
+<p>Why would you want to do this?</p>
+<p>Both <code><a href="https://rdrr.io/pkg/lfe/man/felm.html" class="external-link">lfe::felm()</a></code> and <code><a href="https://lrberge.github.io/fixest/reference/feols.html" class="external-link">fixest::feols()</a></code> provide “fixed-effects” estimation routines for high-dimensional data. Both methods are also highly optimised. However, <code>feols()</code> is newer, tends to be significantly faster, and allows for a lot more functionality (e.g. a <code>predict</code> method). At the same time, the primary author of <strong>lfe</strong> has stopped developing the package. It has since been adopted, but is now essentially in pure maintenance mode.</p>
+<p>The syntax between <code>felm()</code> and <code>feols()</code> is similar, albeit with one not necessarily providing a drop-in replacement for the other. For example, the following two lines of code are functionally equivalent versions of the same underlying model.<sup id="a1"><a href="#f1">1</a></sup></p>
+<ul>
+<li><code>felm(y ~ x1 + x2 | fe1 + fe2 | (x3 | x4 ~ z1 + z2) | cl1, data = dat)</code></li>
+<li><code>feols(y ~ x1 + x2 | fe1 + fe2 | c(x3, x4) ~ z1 + z2, cluster = ~cl1, data = dat)</code></li>
+</ul>
+<p>The <strong>lfe2fixest</strong> package automates the translation between these kinds of models. It does its best to ignoring any non-relevant arguments and adjust for differing syntax options between <code>felm()</code> and <code>feols()</code>. The end goal is a converted R script that will produce exactly the same output, some minor <a href="#caveats">caveats</a> notwithstanding.</p>
+</div>
+<div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
-<p>Start by loading this package. Note the example scripts that follow assume you have both <em>lfe</em> and <strong>fixest</strong>, as well as <strong>modelsummary</strong> installed on your system.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/grantmcdermott/lfe2fixest" class="external-link">lfe2fixest</a></span><span class="op">)</span> <span class="co">## This package</span>
-
-<span class="co">## Aside: Make sure you have the following packages installed on your system if</span>
-<span class="co">## you want to run the example scripts below:</span>
-<span class="co">## library(lfe); library(fixest); library(modelsummary)</span></code></pre></div>
-<p>Let’s create an <strong>lfe</strong>-based R script, that’s deliberately messy to pose an additional challenge (inconsistent formatting, etc.)</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">lfe_string</span> <span class="op">=</span> <span class="st">[1063 chars quoted with '"']</span>
-<span class="fu"><a href="https://rdrr.io/r/base/writeLines.html" class="external-link">writeLines</a></span><span class="op">(</span><span class="va">lfe_string</span>, <span class="st">'lfe_script.R'</span><span class="op">)</span></code></pre></div>
-<p>We can now convert this script to the <strong>fixest</strong> equivalent using the package’s main function, <code><a href="reference/lfe2fixest.html">lfe2fixest()</a></code>, or its alias, <code><a href="reference/lfe2fixest.html">felm2feols()</a></code>. While the function(s) accept several arguments, the only required argument is an input file. Similarly, if no output file argument is provided, then the function(s) will just print the conversion results to screen.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># felm2feols('lfe_script.R') ## same thing</span>
-<span class="fu"><a href="reference/lfe2fixest.html">lfe2fixest</a></span><span class="op">(</span><span class="st">'lfe_script.R'</span><span class="op">)</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; library(fixest)</span>
-<span class="co">#&gt; library(modelsummary)</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; ## Our toy dataset</span>
-<span class="co">#&gt; aq = airquality</span>
-<span class="co">#&gt; names(aq) = c('y', 'x1', 'x2', 'x3', 'mnth', 'dy')</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; ## Simple OLS (no FEs)</span>
-<span class="co">#&gt; mod1 = feols(y ~ x1 + x2,  data = aq)</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; ## Add a FE and cluster variable</span>
-<span class="co">#&gt; mod2 = feols(y ~ x1 + x2 | dy, cluster = ~mnth,  data = aq)</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; ## Add a second cluster variable and some estimation options</span>
-<span class="co">#&gt; mod3 = feols(y ~ x1 + x2 | dy, cluster = ~dy + mnth,  data =</span>
-<span class="co">#&gt;             aq)</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; ## IV reg with weights</span>
-<span class="co">#&gt; mod4 = feols(y ~ 1 | dy | x1 ~ x3, cluster = ~mnth, weights = aq$x2, data = aq )</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; ## Multiple IV</span>
-<span class="co">#&gt; mod5 = feols(y ~ 1 | x1 + x2 ~ x3 + dy + mnth, cluster = ~dy, data = aq )</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; ## Regression table</span>
-<span class="co">#&gt; mods = list(mod1, mod2, mod3, mod4, mod5)</span>
-<span class="co">#&gt; msummary(mods, gof_omit = 'Pseudo|Within|Log|IC', output = 'markdown')</span></code></pre></div>
-<p>Looks good. Note that the <code>feols</code> (<code>felm</code>) model syntax has been cleaned up, with comments removed and everything collapsed onto a single line.<sup id="a2"><a href="#f2">2</a></sup> Let’s write it to disk by supplying an output file this time.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># felm2feols(infile = 'lfe_script.R', outfile = 'fixest_script.R') ## same thing</span>
-<span class="fu"><a href="reference/lfe2fixest.html">lfe2fixest</a></span><span class="op">(</span>infile <span class="op">=</span> <span class="st">'lfe_script.R'</span>, outfile <span class="op">=</span> <span class="st">'fixest_script.R'</span><span class="op">)</span></code></pre></div>
-<p>Note that the <code><a href="reference/lfe2fixest.html">lfe2fixest()</a></code> is a pure conversion function. It never actually runs anything from either the input or output files. That being said, here’s a quick comparison of the resulting regressions — i.e. what we get if we actually <em>do</em> run the scripts. As an aside, my scripts make use of the excellent <a href="https://vincentarelbundock.github.io/modelsummary/index.html" class="external-link"><strong>modelsummary</strong></a> package to generate the simple regression tables that you see below, although we’re really not showing off its functionality here.</p>
-<p>First, the original <strong>lfe</strong> version:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="st">'lfe_script.R'</span>, print.eval <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; |            | Model 1 | Model 2  |    Model 3    | Model 4  | Model 5  |</span>
-<span class="co">#&gt; |:-----------|:-------:|:--------:|:-------------:|:--------:|:--------:|</span>
-<span class="co">#&gt; |(Intercept) | 77.246  |          |               |          |  93.452  |</span>
-<span class="co">#&gt; |            | (9.068) |          |               |          | (65.757) |</span>
-<span class="co">#&gt; |x1          |  0.100  |  0.099   |     0.099     |          |          |</span>
-<span class="co">#&gt; |            | (0.026) | (0.031)  |    (0.029)    |          |          |</span>
-<span class="co">#&gt; |x2          | -5.402  |  -5.577  |    -5.577     |          |          |</span>
-<span class="co">#&gt; |            | (0.673) | (1.100)  |    (1.053)    |          |          |</span>
-<span class="co">#&gt; |`x1(fit)`   |         |          |               |  0.733   |  0.236   |</span>
-<span class="co">#&gt; |            |         |          |               | (0.254)  | (0.179)  |</span>
-<span class="co">#&gt; |`x2(fit)`   |         |          |               |          |  -9.558  |</span>
-<span class="co">#&gt; |            |         |          |               |          | (3.510)  |</span>
-<span class="co">#&gt; |Num.Obs.    |   111   |   111    |      111      |   111    |   111    |</span>
-<span class="co">#&gt; |R2          |  0.449  |  0.665   |     0.665     |  -2.658  |  0.071   |</span>
-<span class="co">#&gt; |R2 Adj.     |  0.439  |  0.527   |     0.527     |  -4.093  |  0.054   |</span>
-<span class="co">#&gt; |Std.Errors  |         | by: mnth | by: dy &amp; mnth | by: mnth |  by: dy  |</span></code></pre></div>
-<p>Second, the <strong>fixest</strong> conversion:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="st">'fixest_script.R'</span>, print.eval <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; |            | Model 1 | Model 2  |    Model 3    | Model 4  | Model 5  |</span>
-<span class="co">#&gt; |:-----------|:-------:|:--------:|:-------------:|:--------:|:--------:|</span>
-<span class="co">#&gt; |(Intercept) | 77.246  |          |               |          |  93.452  |</span>
-<span class="co">#&gt; |            | (9.068) |          |               |          | (65.757) |</span>
-<span class="co">#&gt; |x1          |  0.100  |  0.099   |     0.099     |          |          |</span>
-<span class="co">#&gt; |            | (0.026) | (0.031)  |    (0.029)    |          |          |</span>
-<span class="co">#&gt; |x2          | -5.402  |  -5.577  |    -5.577     |          |          |</span>
-<span class="co">#&gt; |            | (0.673) | (1.100)  |    (1.053)    |          |          |</span>
-<span class="co">#&gt; |fit_x1      |         |          |               |  0.733   |  0.236   |</span>
-<span class="co">#&gt; |            |         |          |               | (0.254)  | (0.179)  |</span>
-<span class="co">#&gt; |fit_x2      |         |          |               |          |  -9.558  |</span>
-<span class="co">#&gt; |            |         |          |               |          | (3.510)  |</span>
-<span class="co">#&gt; |Num.Obs.    |   111   |   111    |      111      |   111    |   111    |</span>
-<span class="co">#&gt; |R2          |  0.449  |  0.665   |     0.665     |  -2.658  |  0.071   |</span>
-<span class="co">#&gt; |R2 Adj.     |  0.439  |  0.527   |     0.527     |  -4.093  |  0.054   |</span>
-<span class="co">#&gt; |Std.Errors  |   IID   | by: mnth | by: dy &amp; mnth | by: mnth |  by: dy  |</span>
-<span class="co">#&gt; |FE: dy      |         |    X     |       X       |    X     |          |</span></code></pre></div>
-<p>Some minor formatting differences aside, looks like it worked and we get the exact same results from both scripts. Great!</p>
-<p>Let’s clean up before closing.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.remove</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'lfe_script.R'</span>, <span class="st">'fixest_script.R'</span><span class="op">)</span><span class="op">)</span>
-<span class="co">#&gt; [1] TRUE TRUE</span></code></pre></div>
+<p>A detailed example is provided in the <a href="http://grantmcdermott.com/lfe2fixest/articles/lfe2fixest.html">introductory vignette</a>. See <code><a href="articles/lfe2fixest.html">vignette("lfe2fixest")</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="caveats">Caveats<a class="anchor" aria-label="anchor" href="#caveats"></a>
@@ -199,7 +108,6 @@
 <li>Similarly, the package only supports models that are explicitly written out in a script. If your models are constructed programatically (e.g. with <code>Formula()</code>) then the conversion probably won’t work.</li>
 </ul>
 <p><sup><b id="f1">1</b></sup> An IV regression with multiple endogenous variables and fixed effects, as well as clustered standard errors. But that’s besides the point.<a href="#a1">↩︎</a></p>
-<p><sup><b id="f2">2</b></sup> The loss of inline comments is a little unfortunate, but necessary given the way that the function parses input.<a href="#a2">↩︎</a></p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
@@ -233,7 +141,12 @@
 </ul>
 </div>
 
-
+<div class="dev-status">
+<h2 data-toc-skip>Dev status</h2>
+<ul class="list-unstyled">
+<li><a href="https://github.com/grantmcdermott/lfe2fixest/actions" class="external-link"><img src="https://github.com/grantmcdermott/lfe2fixest/workflows/R-CMD-check/badge.svg" alt="R-CMD-check"></a></li>
+</ul>
+</div>
 
   </aside>
 </div>
