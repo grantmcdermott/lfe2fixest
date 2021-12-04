@@ -41,18 +41,18 @@ names(aq) = c('y', 'x1', 'x2', 'x3', 'mnth', 'dy')
 ## Simple OLS
 mod1 = felm(y ~ x1 + x2, aq)
 
-## Add FE & cluster variable
+## Add FE & cluster var
 mod2 = felm(y ~ x1 + x2 |
               dy |
               0 |
               mnth, aq)
 
-## Add a 2nd cluster variable & some estimation options
+## Add 2nd cluster var & some estimation options
 mod3 = felm(y ~ x1 + x2 |
               dy |
               0 |
               dy + mnth,
-            cmethod = 'reghdfe', ## Same as feols too
+            cmethod = 'reghdfe',
             exactDOF = TRUE,     ## Irrelevant for feols (should be ignored)
             aq)
 
