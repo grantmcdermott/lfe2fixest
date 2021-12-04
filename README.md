@@ -8,9 +8,6 @@
 [![R-CMD-check](https://github.com/grantmcdermott/lfe2fixest/workflows/R-CMD-check/badge.svg)](https://github.com/grantmcdermott/lfe2fixest/actions)
 <!-- badges: end -->
 
-[`Installation`](#installation) \| [`Motivation`](#motivation) \|
-[`Example`](#example) \| [`Caveats`](#caveats)
-
 ## Installation
 
 Install the package directly from GitHub:
