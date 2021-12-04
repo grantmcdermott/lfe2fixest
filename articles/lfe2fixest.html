@@ -82,7 +82,53 @@
 <span class="co">## library(lfe); library(fixest); library(modelsummary)</span></code></pre></div>
 <p>Let’s create an <strong>lfe</strong>-based R script, that’s deliberately messy to pose an additional challenge (inconsistent formatting, etc.)</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">lfe_string</span> <span class="op">=</span> <span class="st">[1029 chars quoted with '"']</span>
+<code class="sourceCode R"><span class="va">lfe_string</span> <span class="op">=</span> <span class="st">"
+library(lfe)
+library(modelsummary)
+
+## Toy dataset
+aq = airquality
+names(aq) = c('y', 'x1', 'x2', 'x3', 'mnth', 'dy')
+
+## Simple OLS
+mod1 = felm(y ~ x1 + x2, aq)
+
+## Add FE &amp; cluster var
+mod2 = felm(y ~ x1 + x2 |
+              dy |
+              0 |
+              mnth, aq)
+
+## Add 2nd cluster var &amp; some estimation options
+mod3 = felm(y ~ x1 + x2 |
+              dy |
+              0 |
+              dy + mnth,
+            cmethod = 'reghdfe',
+            exactDOF = TRUE,     ## Irrelevant for feols (should be ignored)
+            aq)
+
+## IV reg with weights
+mod4 = felm(y ~ 1 |
+              dy |
+              (x1 ~ x3) |
+              mnth,
+            weights = aq$x2,
+            data = aq
+            )
+
+## Multiple IV
+mod5 = felm(y ~ 1 |
+              0 |
+              (x1|x2 ~ x3 + dy + mnth) |
+              dy,
+            data = aq
+            )
+
+## Regression table
+mods = list(mod1, mod2, mod3, mod4, mod5)
+msummary(mods, gof_omit = 'Pseudo|Within|Log|IC', output = 'markdown')
+"</span>
 <span class="fu"><a href="https://rdrr.io/r/base/writeLines.html" class="external-link">writeLines</a></span><span class="op">(</span><span class="va">lfe_string</span>, <span class="st">'lfe_script.R'</span><span class="op">)</span></code></pre></div>
 <p>We can now convert this script to the <strong>fixest</strong> equivalent using the package’s main function, <code><a href="../reference/lfe2fixest.html">lfe2fixest()</a></code>, or its alias, <code><a href="../reference/lfe2fixest.html">felm2feols()</a></code>. While the function(s) accept several arguments, the only required argument is an input file. Similarly, if no output file argument is provided, then the function(s) will just print the conversion results to screen.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
@@ -99,10 +145,10 @@
 <span class="co">#&gt; ## Simple OLS</span>
 <span class="co">#&gt; mod1 = feols(y ~ x1 + x2,  data = aq)</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; ## Add FE &amp; cluster variable</span>
+<span class="co">#&gt; ## Add FE &amp; cluster var</span>
 <span class="co">#&gt; mod2 = feols(y ~ x1 + x2 | dy, cluster = ~mnth,  data = aq)</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; ## Add a 2nd cluster variable &amp; some estimation options</span>
+<span class="co">#&gt; ## Add 2nd cluster var &amp; some estimation options</span>
 <span class="co">#&gt; mod3 = feols(y ~ x1 + x2 | dy, cluster = ~dy + mnth,  data =</span>
 <span class="co">#&gt;             aq)</span>
 <span class="co">#&gt; </span>
